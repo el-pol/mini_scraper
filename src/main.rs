@@ -13,14 +13,17 @@ fn main() {
         "https://theverge.com",
     ];
 
-    let handle = thread::spawn(|| {
-        for i in multiple {
-            match fetch_status(i) {
-                Ok(status) => println!("Status code: {status}"),
-                Err(e) => eprintln!("Error: {e}"),
-            }
-        }
-    });
+    let mut handles = vec![];
 
-    handle.join().unwrap();
+    for url in multiple {
+        let handle = thread::spawn(|| match fetch_status(url) {
+            Ok(status) => println!("Status code: {status}"),
+            Err(e) => eprintln!("Error: {e}"),
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
 }
