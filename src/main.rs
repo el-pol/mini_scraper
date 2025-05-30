@@ -11,9 +11,16 @@ fn fetch_status(url: &str) -> Result<u16, Box<dyn Error>> {
 
 fn fetch_title(url: &str) -> Result<String, Box<dyn Error>> {
     let body = reqwest::blocking::get(url)?.text()?;
-    let parsed = scraper::Html::parse_document(&body);
+    let selector = scraper::Selector::parse("title").unwrap();
+    let document = scraper::Html::parse_document(&body);
 
-    Ok("parsed".to_string())
+    let title = document
+        .select(&selector)
+        .next()
+        .map(|t| t.text().collect::<Vec<_>>().join(""))
+        .unwrap_or("(no title foundk)".to_string());
+
+    Ok(title)
 }
 
 fn main() {
@@ -26,7 +33,7 @@ fn main() {
     let mut handles = vec![];
 
     for url in multiple {
-        let handle = thread::spawn(|| match fetch_status(url) {
+        let handle = thread::spawn(|| match fetch_title(url) {
             Ok(status) => println!("Status code: {status}"),
             Err(e) => eprintln!("Error: {e}"),
         });
