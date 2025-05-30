@@ -23,6 +23,8 @@ fn main() {
         "https://google.com",
         "https://as.com",
         "https://theverge.com",
+        "https://news.ycombinator.com",
+        "https://eldiario.es",
     ];
 
     let mut handles = vec![];
