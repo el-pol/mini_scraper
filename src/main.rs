@@ -57,14 +57,26 @@ fn main() {
         "https://osldiario.es",
     ];
 
-    let mut handles = vec![];
+    let rounds = 10;
 
-    for url in multiple {
-        let handle = spawn(move || fetch_with_attempts(&url));
-        handles.push(handle);
-    }
+    for round in 1..=rounds {
+        println!("🔁 Round {round}");
 
-    for handle in handles {
-        handle.join().unwrap();
+        let start = Instant::now();
+        // Launch threads to scrape
+        let mut handles = vec![];
+
+        for url in &multiple {
+            let url = url.to_string();
+            let handle = spawn(move || fetch_with_attempts(&url));
+            handles.push(handle);
+        }
+        // Join threads
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        let duration = start.elapsed();
+        println!("Round {round} took {:?}", duration);
     }
 }
