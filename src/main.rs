@@ -2,6 +2,7 @@ use chrono::Local;
 use reqwest;
 use scraper;
 use std::error::Error;
+use std::fs;
 use std::thread::{sleep, spawn};
 use std::time::{Duration, Instant};
 
@@ -47,15 +48,17 @@ fn fetch_with_attempts(url: &str) {
     }
 }
 
-fn main() {
-    let multiple = vec![
-        "https://google.com",
-        "https://as.com",
-        "https://theverge.com",
-        "https://news.ycombinator.com",
-        "https://eldiario.es",
-        "https://osldiario.es",
-    ];
+fn main() -> Result<(), Box<dyn Error>> {
+    let contents: String = fs::read_to_string("urls.txt")?;
+    println!("{}", contents);
+
+    let urls: Vec<String> = contents
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(String::from)
+        .collect();
+    // println!("{:?}", urls);
 
     let rounds = 10;
 
@@ -67,8 +70,8 @@ fn main() {
         // Launch threads to scrape
         let mut handles = vec![];
 
-        for url in &multiple {
-            let url = url.to_string();
+        for url in &urls {
+            let url = url.clone();
             let handle = spawn(move || fetch_with_attempts(&url));
             handles.push(handle);
         }
@@ -84,4 +87,6 @@ fn main() {
     let total: Duration = round_durations.iter().sum();
     let avg = total / rounds;
     println!("📊 Average round duration: {:?}", avg);
+
+    Ok(())
 }
