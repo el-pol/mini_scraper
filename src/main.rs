@@ -59,6 +59,7 @@ fn main() {
 
     let rounds = 10;
 
+    let mut round_durations = vec![];
     for round in 1..=rounds {
         println!("🔁 Round {round}");
 
@@ -78,5 +79,9 @@ fn main() {
 
         let duration = start.elapsed();
         println!("Round {round} took {:?}", duration);
+        round_durations.push(duration);
     }
+    let total: Duration = round_durations.iter().sum();
+    let avg = total / rounds;
+    println!("📊 Average round duration: {:?}", avg);
 }
