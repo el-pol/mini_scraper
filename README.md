@@ -1,6 +1,8 @@
-# Concurrent Web Scraper
+# mini-scraper: a concurrent web scraper
 
 A high-performance web scraper written in Rust that fetches titles from multiple websites concurrently. The scraper implements retry logic and performance monitoring to ensure reliable operation.
+
+I built this project to fundamentally learn about threads in Rust.
 
 ## Features
 
@@ -14,7 +16,7 @@ A high-performance web scraper written in Rust that fetches titles from multiple
 
 - Rust (latest stable version)
 - Internet connection
-- A `urls.txt` file containing target URLs (one per line)
+- A `urls.txt` file containing target URLs (**one per line**)
 
 ## Dependencies
 
