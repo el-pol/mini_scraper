@@ -1,6 +1,4 @@
 use chrono::Local;
-use reqwest;
-use scraper;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
@@ -30,7 +28,7 @@ fn fetch_with_attempts(url: &str) -> Option<Duration> {
     let start = Instant::now();
     let number_of_attempts = 3;
     for attempt in 1..=number_of_attempts {
-        match fetch_title(&url) {
+        match fetch_title(url) {
             Ok(title) => {
                 println!("Success in attempt {:?}", attempt);
                 let duration = start.elapsed();
@@ -75,7 +73,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let url = url.clone();
             let handle = spawn(move || {
                 let fetch_result = fetch_with_attempts(&url);
-                return (url, fetch_result);
+                (url, fetch_result)
             });
             handles.push(handle);
         }
@@ -83,10 +81,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         for handle in handles {
             let (url, dur_option) = handle.join().unwrap();
             if let Some(dur) = dur_option {
-                results_as_hashmap
-                    .entry(url)
-                    .or_insert_with(Vec::new)
-                    .push(dur);
+                results_as_hashmap.entry(url).or_default().push(dur);
             }
         }
 
