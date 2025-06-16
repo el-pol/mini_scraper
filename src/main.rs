@@ -1,6 +1,7 @@
 use chrono::Local;
 use reqwest;
 use scraper;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use std::thread::{sleep, spawn};
@@ -20,7 +21,7 @@ fn fetch_title(url: &str) -> Result<String, Box<dyn Error>> {
     Ok(title)
 }
 
-fn fetch_with_attempts(url: &str) {
+fn fetch_with_attempts(url: &str) -> Option<Duration> {
     let now = Local::now();
     println!(
         "[{url}] 🕒 Thread started at: {}",
@@ -29,13 +30,12 @@ fn fetch_with_attempts(url: &str) {
     let start = Instant::now();
     let number_of_attempts = 3;
     for attempt in 1..=number_of_attempts {
-        println!("{attempt}");
         match fetch_title(&url) {
             Ok(title) => {
                 println!("Success in attempt {:?}", attempt);
                 let duration = start.elapsed();
                 println!("[{url}] Title: {title} (took {:?})", duration);
-                break;
+                return Some(duration);
             }
             Err(e) => {
                 if attempt < number_of_attempts {
@@ -46,6 +46,7 @@ fn fetch_with_attempts(url: &str) {
             }
         }
     }
+    None
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -58,11 +59,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         .filter(|line| !line.is_empty())
         .map(String::from)
         .collect();
-    // println!("{:?}", urls);
 
     let rounds = 10;
 
     let mut round_durations = vec![];
+    let mut results_as_hashmap: HashMap<String, Vec<Duration>> = HashMap::new();
     for round in 1..=rounds {
         println!("🔁 Round {round}");
 
@@ -72,12 +73,21 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         for url in &urls {
             let url = url.clone();
-            let handle = spawn(move || fetch_with_attempts(&url));
+            let handle = spawn(move || {
+                let fetch_result = fetch_with_attempts(&url);
+                return (url, fetch_result);
+            });
             handles.push(handle);
         }
         // Join threads
         for handle in handles {
-            handle.join().unwrap();
+            let (url, dur_option) = handle.join().unwrap();
+            if let Some(dur) = dur_option {
+                results_as_hashmap
+                    .entry(url)
+                    .or_insert_with(Vec::new)
+                    .push(dur);
+            }
         }
 
         let duration = start.elapsed();
@@ -87,6 +97,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     let total: Duration = round_durations.iter().sum();
     let avg = total / rounds;
     println!("📊 Average round duration: {:?}", avg);
+
+    for (url, durations) in results_as_hashmap {
+        let count = durations.len() as u32;
+        if count > 0 {
+            let total_duration: Duration = durations.iter().sum();
+            let average_duration = total_duration / count;
+            println!(
+                "🔗 URL: {url} - Average duration over {count} successful requests: {:?}",
+                average_duration
+            );
+        }
+    }
 
     Ok(())
 }
