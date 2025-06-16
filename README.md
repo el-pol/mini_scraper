@@ -2,7 +2,7 @@
 
 A high-performance web scraper written in Rust that fetches titles from multiple websites concurrently. The scraper implements retry logic and performance monitoring to ensure reliable operation.
 
-I built this project to fundamentally learn about threads in Rust.
+My goal with this project was to learn about threads in Rust, and also about scraping. I'm not use to parallelization & multiple threads in JavaScript, so it was a great learning experience. I was impressed at how faster it makes things.
 
 ## Features
 
@@ -67,8 +67,8 @@ The scraper:
 2. Launches a separate thread for each URL
 3. Attempts to fetch each page's title up to 3 times
 4. Reports success/failure and timing information
-5. Runs multiple rounds to gather performance metrics
-6. Calculates and displays average round duration
+5. Runs multiple rounds (10) to gather performance metrics
+6. Calculates and displays the average of how much time it took to scrape each site
 
 ## Output
 
@@ -99,4 +99,4 @@ The scraper is designed for performance:
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. Feel free to also comment on my code to help me improve it & point obvious mistakes.
